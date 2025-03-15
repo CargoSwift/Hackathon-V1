@@ -81,3 +81,49 @@ It ensures **optimized storage, quick retrieval, waste tracking, and cargo retur
 ```bash
 git clone https://github.com/your-repo/space-cargo-management.git
 cd space-cargo-management
+
+### **2️⃣ Setup Backend (Jigme)**
+cd backend
+pip install -r requirements.txt  # Python dependencies
+uvicorn main:app --host 0.0.0.0 --port 8000  # Start FastAPI server
+
+### **3️⃣ Setup Frontend (Adithya)**
+cd frontend
+npm install
+npm start  # Run React.js frontend
+
+### **4️⃣ Setup Docker Deployment (Rishita)**
+docker build -t space-cargo .
+docker run -p 8000:8000 space-cargo  # Runs the API on port 8000
+
+
+##  🌍 API Endpoints
+🚀 Placement API (POST)
+Endpoint: /api/placement
+Function: Suggests best placement for incoming cargo.
+Request:
+{
+  "items": [{"itemId": "001", "name": "Food Packet", "width": 10, "depth": 10, "height": 20, "priority": 80}],
+  "containers": [{"containerId": "contA", "zone": "Crew Quarters", "width": 100, "depth": 85, "height": 200}]
+}
+
+Response:
+{
+  "success": true,
+  "placements": [{"itemId": "001", "containerId": "contA", "position": {"startCoordinates": {"width": 0, "depth": 0, "height": 0}}}]
+}
+
+🔍 Item Search API (GET)
+Endpoint: /api/search?itemId=001
+Function: Finds the location of a specific item.
+Response:
+{
+  "success": true,
+  "found": true,
+  "item": {"itemId": "001", "containerId": "contA", "zone": "Crew Quarters"}
+}
+
+## 🗑️ Waste Management API (GET)
+Endpoint: /api/waste/identify
+Function: Lists all expired or depleted items.
+
