@@ -77,22 +77,22 @@ It ensures **optimized storage, quick retrieval, waste tracking, and cargo retur
 
 ## 🔧 Installation & Setup  
 
-### **1️⃣ Clone the Repository**
+### **Clone the Repository**
 ```bash
 git clone https://github.com/your-repo/space-cargo-management.git
 cd space-cargo-management
 
-### **2️⃣ Setup Backend (Jigme)**
+### **Setup Backend (Jigme)**
 cd backend
 pip install -r requirements.txt  # Python dependencies
 uvicorn main:app --host 0.0.0.0 --port 8000  # Start FastAPI server
 
-### **3️⃣ Setup Frontend (Adithya)**
+### **Setup Frontend (Adithya)**
 cd frontend
 npm install
 npm start  # Run React.js frontend
 
-### **4️⃣ Setup Docker Deployment (Rishita)**
+### **Setup Docker Deployment (Rishita)**
 docker build -t space-cargo .
 docker run -p 8000:8000 space-cargo  # Runs the API on port 8000
 
