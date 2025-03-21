@@ -1,3 +1,6 @@
+setup python venv
+
+python -m venv venv
 
 activate python environment
 
