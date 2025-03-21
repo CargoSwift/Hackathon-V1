@@ -79,13 +79,14 @@ It ensures **optimized storage, quick retrieval, waste tracking, and cargo retur
 
 ### **Clone the Repository**
 ```bash
-git clone https://github.com/your-repo/space-cargo-management.git
-cd space-cargo-management
+git clone https://github.com/CargoSwift/Hackathon-V1.git
+cd Hackathon-V1
 
 ### **Setup Backend (Jigme)**
 cd backend
+python -m venv venv
 pip install -r requirements.txt  # Python dependencies
-uvicorn main:app --host 0.0.0.0 --port 8000  # Start FastAPI server
+python server.py  # Start FastAPI server
 
 ### **Setup Frontend (Adithya)**
 cd frontend
