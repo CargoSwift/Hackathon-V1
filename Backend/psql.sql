@@ -98,3 +98,24 @@ CREATE TABLE logs (
 );
 
 
+
+ALTER TABLE IF EXISTS public.containers
+    OWNER TO cargo_admin;
+
+ALTER TABLE IF EXISTS public.items
+    OWNER TO cargo_admin;
+
+ALTER TABLE IF EXISTS public.logs
+    OWNER TO cargo_admin;
+
+ALTER TABLE IF EXISTS public.placements
+    OWNER TO cargo_admin;
+
+ALTER TABLE IF EXISTS public.retrievals
+    OWNER TO cargo_admin;
+
+ALTER TABLE IF EXISTS public.return_plans
+    OWNER TO cargo_admin;
+
+ALTER TABLE IF EXISTS public.waste
+    OWNER TO cargo_admin;
