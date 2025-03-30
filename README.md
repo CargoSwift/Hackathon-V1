@@ -128,3 +128,10 @@ Response:
 Endpoint: /api/waste/identify
 Function: Lists all expired or depleted items.
 
+
+
+## run docker
+docker-compose up --build
+
+## clear docker cache files
+docker-compose down -v 
