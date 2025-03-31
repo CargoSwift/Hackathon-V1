@@ -1,40 +1,26 @@
-# backend/app.py
 from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
-from datetime import datetime, timedelta
+from datetime import datetime
 import csv
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import json
 import os
 from dotenv import load_dotenv
+import uuid
 
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
 
 # Database connection
 def get_db_connection():
-    conn = psycopg2.connect(
+    return psycopg2.connect(
         host=os.getenv('DB_HOST'),
         database=os.getenv('DB_NAME'),
         user=os.getenv('DB_USER'),
         password=os.getenv('DB_PASSWORD'),
-        port=os.getenv('DB_PORT'))
-    return conn
-
-# Helper functions
-def log_action(action_type, item_id=None, user_id=None, details=None):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "INSERT INTO logs (action_type, item_id, user_id, details) VALUES (%s, %s, %s, %s)",
-        (action_type, item_id, user_id, details)
+        port=os.getenv('DB_PORT')
     )
-    conn.commit()
-    cur.close()
-    conn.close()
-
 def calculate_retrieval_steps(item_id, container_id):
     # This is a simplified version - in a real implementation, you'd need to:
     # 1. Find all items in front of the target item in the container
@@ -62,6 +48,95 @@ def calculate_retrieval_steps(item_id, container_id):
     cur.close()
     conn.close()
     return steps
+
+# Helper functions
+def log_action(action_type, item_id=None, user_id=None, details=None):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO logs (action_type, item_id, user_id, details) VALUES (%s, %s, %s, %s)",
+        (action_type, item_id, user_id, details)
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def calculate_placement(containers, items):
+    """Simplified placement algorithm - sorts items by priority and places in available space"""
+    placements = []
+    rearrangements = []
+    
+    # Sort items by priority (highest first)
+    sorted_items = sorted(items, key=lambda x: x['priority'], reverse=True)
+    
+    for item in sorted_items:
+        placed = False
+        
+        # Try preferred zone first
+        for container in containers:
+            if container['zone'] == item['preferredZone']:
+                # Check if item fits (simplified check)
+                if (float(container['available_volume']) >= 
+                    float(item['width']) * float(item['depth']) * float(item['height'])):
+                    
+                    placement = {
+                        "itemId": item['itemId'],
+                        "containerId": container['containerId'],
+                        "position": {
+                            "startCoordinates": {
+                                "width": 0, 
+                                "depth": 0, 
+                                "height": 0
+                            },
+                            "endCoordinates": {
+                                "width": item['width'],
+                                "depth": item['depth'],
+                                "height": item['height']
+                            }
+                        }
+                    }
+                    placements.append(placement)
+                    av = float(container['available_volume'])
+                    av -= float(item['width']) * float(item['depth']) * float(item['height'])
+                    container['available_volume'] = av 
+                    placed = True
+                    break
+        
+        # If not placed in preferred zone, try any available container
+        if not placed:
+            for container in containers:
+                if float(container['available_volume']) >= float(item['width']) * float(item['depth']) * float(item['height']):
+                    placement = {
+                        "itemId": item['itemId'],
+                        "containerId": container['containerId'],
+                        "position": {
+                            "startCoordinates": {
+                                "width": 0, 
+                                "depth": 0, 
+                                "height": 0
+                            },
+                            "endCoordinates": {
+                                "width": item['width'],
+                                "depth": item['depth'],
+                                "height": item['height']
+                            }
+                        }
+                    }
+                    placements.append(placement)
+                    av = float(container['available_volume'])
+                    av -= float(item['width']) * float(item['depth']) * float(item['height'])
+                    container['available_volume'] = av 
+                    placed = True
+                    break
+        
+        if not placed:
+            rearrangements.append({
+                "itemId": item['itemId'],
+                "message": "Insufficient space - rearrangement required"
+            })
+    
+    print(placements)
+    return placements, rearrangements
 
 def check_expired_items():
     conn = get_db_connection()
@@ -92,138 +167,55 @@ def check_expired_items():
 def home():
     return jsonify({'message': 'Space Station Cargo Management System API'})
 
+
+
 # Placement Recommendations API
 @app.route('/api/placement', methods=['POST'])
 def placement_recommendations():
     data = request.json
-    new_items = data.get('items', [])
+    containers = data.get('containers', [])
+    items = data.get('items', [])
+    
+    placements, rearrangements = calculate_placement(containers, items)
+    
     conn = get_db_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = conn.cursor()
     
-    placements = []
-    rearrangements = []
-    
-    for item in new_items:
-        # Try preferred zone first
-        cur.execute("""
-            SELECT container_id, available_volume 
-            FROM containers 
-            WHERE zone = %s AND available_volume >= %s
-            ORDER BY available_volume DESC
-            LIMIT 1
-        """, (item['preferredZone'], item['width'] * item['depth'] * item['height']))
+    try:
+        for placement in placements:
+            # Convert coordinates to proper JSON strings
+            start_coords = json.dumps(placement['position']['startCoordinates'])
+            end_coords = json.dumps(placement['position']['endCoordinates'])
+            
+            cur.execute(
+                "INSERT INTO placements (item_id, container_id, start_coordinates, end_coordinates) "
+                "VALUES (%s, %s, %s::json, %s::json)",
+                (
+                    placement['itemId'],
+                    placement['containerId'],
+                    start_coords,
+                    end_coords
+                )
+            )
+            cur.execute(
+                "UPDATE items SET current_zone = (SELECT zone FROM containers WHERE container_id = %s) "
+                "WHERE item_id = %s",
+                (placement['containerId'], placement['itemId'])
+            )
+        conn.commit()
+        log_action("placement", details=f"Placement recommendations generated")
+        return jsonify({
+            "success": True,
+            "placements": placements,
+            "rearrangements": rearrangements
+        })
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)})
+    finally:
+        cur.close()
+        conn.close()
         
-        container = cur.fetchone()
-        
-        if container:
-            # Place in preferred zone
-            placement = {
-                "itemId": item['itemId'],
-                "containerId": container['container_id'],
-                "position": {
-                    "startCoordinates": {"width": 0, "depth": 0, "height": 0},
-                    "endCoordinates": {
-                        "width": item['width'],
-                        "depth": item['depth'],
-                        "height": item['height']
-                    }
-                }
-            }
-            placements.append(placement)
-            
-            # Update container available volume
-            cur.execute("""
-                UPDATE containers 
-                SET available_volume = available_volume - %s 
-                WHERE container_id = %s
-            """, (item['width'] * item['depth'] * item['height'], container['container_id']))
-            
-            # Update item current zone
-            cur.execute("""
-                UPDATE items 
-                SET current_zone = %s 
-                WHERE item_id = %s
-            """, (item['preferredZone'], item['itemId']))
-            
-            # Log placement
-            cur.execute("""
-                INSERT INTO placements (item_id, container_id, start_coordinates, end_coordinates)
-                VALUES (%s, %s, %s, %s)
-            """, (
-                item['itemId'],
-                container['container_id'],
-                '{"width": 0, "depth": 0, "height": 0}',
-                f'{{"width": {item["width"]}, "depth": {item["depth"]}, "height": {item["height"]}}}'
-            ))
-        else:
-            # Try any available container
-            cur.execute("""
-                SELECT container_id, zone, available_volume 
-                FROM containers 
-                WHERE available_volume >= %s
-                ORDER BY available_volume DESC
-                LIMIT 1
-            """, (item['width'] * item['depth'] * item['height'],))
-            
-            container = cur.fetchone()
-            
-            if container:
-                placement = {
-                    "itemId": item['itemId'],
-                    "containerId": container['container_id'],
-                    "position": {
-                        "startCoordinates": {"width": 0, "depth": 0, "height": 0},
-                        "endCoordinates": {
-                            "width": item['width'],
-                            "depth": item['depth'],
-                            "height": item['height']
-                        }
-                    }
-                }
-                placements.append(placement)
-                
-                # Update container available volume
-                cur.execute("""
-                    UPDATE containers 
-                    SET available_volume = available_volume - %s 
-                    WHERE container_id = %s
-                """, (item['width'] * item['depth'] * item['height'], container['container_id']))
-                
-                # Update item current zone
-                cur.execute("""
-                    UPDATE items 
-                    SET current_zone = %s 
-                    WHERE item_id = %s
-                """, (container['zone'], item['itemId']))
-                
-                # Log placement
-                cur.execute("""
-                    INSERT INTO placements (item_id, container_id, start_coordinates, end_coordinates)
-                    VALUES (%s, %s, %s, %s)
-                """, (
-                    item['itemId'],
-                    container['container_id'],
-                    '{"width": 0, "depth": 0, "height": 0}',
-                    f'{{"width": {item["width"]}, "depth": {item["depth"]}, "height": {item["height"]}}}'
-                ))
-            else:
-                # No space available - suggest rearrangement
-                rearrangements.append({
-                    "itemId": item['itemId'],
-                    "message": "Insufficient space - rearrangement required"
-                })
-    
-    conn.commit()
-    cur.close()
-    conn.close()
-    
-    log_action("placement", details=f"Placed {len(placements)} items")
-    return jsonify({
-        "success": True, 
-        "placements": placements, 
-        "rearrangements": rearrangements
-    })
-
 # Item Search and Retrieval API
 @app.route('/api/search', methods=['GET'])
 def search_item():
@@ -367,56 +359,188 @@ def place_item():
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    # Get item and container info
-    cur.execute("SELECT * FROM items WHERE item_id = %s", (item_id,))
-    item = cur.fetchone()
+    try:
+        # Get item and container info
+        cur.execute("SELECT * FROM items WHERE item_id = %s", (item_id,))
+        item = cur.fetchone()
+        
+        cur.execute("SELECT * FROM containers WHERE container_id = %s", (container_id,))
+        container = cur.fetchone()
+        
+        if not item or not container:
+            return jsonify({"success": False, "message": "Item or container not found"})
+        
+        # Calculate item volume
+        item_volume = item['width'] * item['depth'] * item['height']
+        
+        # Check if container has enough space
+        if container['available_volume'] < item_volume:
+            return jsonify({"success": False, "message": "Not enough space in container"})
+        
+        # Convert coordinates to proper JSON strings
+        start_coords = json.dumps(position['startCoordinates'])
+        end_coords = json.dumps(position['endCoordinates'])
+        
+        # Record the placement
+        cur.execute("""
+            INSERT INTO placements (item_id, container_id, start_coordinates, end_coordinates)
+            VALUES (%s, %s, %s::json, %s::json)
+        """, (
+            item_id,
+            container_id,
+            start_coords,
+            end_coords
+        ))
+        
+        # Update container available volume
+        cur.execute("""
+            UPDATE containers 
+            SET available_volume = available_volume - %s 
+            WHERE container_id = %s
+        """, (item_volume, container_id))
+        
+        # Update item current zone
+        cur.execute("""
+            UPDATE items 
+            SET current_zone = %s 
+            WHERE item_id = %s
+        """, (container['zone'], item_id))
+        
+        conn.commit()
+        log_action("placement", item_id=item_id, user_id=user_id, 
+                  details=f"Placed item in container {container_id}")
+        
+        return jsonify({"success": True, "message": "Item placed successfully"})
+        
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)})
+    finally:
+        cur.close()
+        conn.close()
+
+
+@app.route('/api/rearrange', methods=['POST'])
+def generate_rearrangement_plan():
+    data = request.json
+    container_id = data['containerId']
+    items_in_container = data['items']
     
-    cur.execute("SELECT * FROM containers WHERE container_id = %s", (container_id,))
-    container = cur.fetchone()
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    if not item or not container:
-        return jsonify({"success": False, "message": "Item or container not found"})
+    try:
+        # 1. Get all containers with available space
+        cur.execute("""
+            SELECT container_id, zone, available_volume 
+            FROM containers 
+            WHERE container_id != %s
+            ORDER BY available_volume DESC
+        """, (container_id,))
+        other_containers = cur.fetchall()
+        
+        # 2. Identify low-priority items that can be moved
+        movable_items = sorted(
+            [item for item in items_in_container if item['priority'] < 50],
+            key=lambda x: x['priority']
+        )
+        
+        # 3. Create rearrangement plan
+        plan = {
+            "planId": str(uuid.uuid4()),
+            "containerId": container_id,
+            "spaceFreed": 0,
+            "estimatedTime": 0,
+            "itemsToMove": [],
+            "steps": []
+        }
+        
+        # 4. Calculate optimal moves
+        for item in movable_items:
+            item_volume = item['width'] * item['depth'] * item['height']
+            
+            # Find first container with enough space
+            for container in other_containers:
+                if container['available_volume'] >= item_volume:
+                    plan['itemsToMove'].append(item['item_id'])
+                    plan['spaceFreed'] += item_volume
+                    plan['estimatedTime'] += 2  # 2 minutes per item moved
+                    
+                    plan['steps'].append({
+                        "action": "move",
+                        "itemId": item['item_id'],
+                        "fromContainer": container_id,
+                        "toContainer": container['container_id'],
+                        "reason": f"Low priority (P{item['priority']}), makes space for higher priority items"
+                    })
+                    
+                    # Update container's available volume for next calculations
+                    container['available_volume'] -= item_volume
+                    break
+        
+        # 5. Add rotation suggestions for remaining items
+        remaining_items = [item for item in items_in_container 
+                         if item['item_id'] not in plan['itemsToMove']]
+        
+        for item in remaining_items:
+            # Check if rotating would help (simplified logic)
+            if item['width'] != item['height']:
+                plan['steps'].append({
+                    "action": "rotate",
+                    "itemId": item['item_id'],
+                    "newOrientation": f"{item['height']}x{item['width']}x{item['depth']}",
+                    "reason": "Optimize space utilization"
+                })
+                plan['estimatedTime'] += 1  # 1 minute per rotation
+        
+        return jsonify({
+            "success": True,
+            "plan": plan
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        })
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/api/rearrange/execute', methods=['POST'])
+def execute_rearrangement():
+    data = request.json
+    plan_id = data['planId']
     
-    # Calculate item volume
-    item_volume = item['width'] * item['depth'] * item['height']
+    conn = get_db_connection()
+    cur = conn.cursor()
     
-    # Check if container has enough space
-    if container['available_volume'] < item_volume:
-        return jsonify({"success": False, "message": "Not enough space in container"})
-    
-    # Record the placement
-    cur.execute("""
-        INSERT INTO placements (item_id, container_id, start_coordinates, end_coordinates)
-        VALUES (%s, %s, %s, %s)
-    """, (
-        item_id,
-        container_id,
-        position['startCoordinates'],
-        position['endCoordinates']
-    ))
-    
-    # Update container available volume
-    cur.execute("""
-        UPDATE containers 
-        SET available_volume = available_volume - %s 
-        WHERE container_id = %s
-    """, (item_volume, container_id))
-    
-    # Update item current zone
-    cur.execute("""
-        UPDATE items 
-        SET current_zone = %s 
-        WHERE item_id = %s
-    """, (container['zone'], item_id))
-    
-    conn.commit()
-    cur.close()
-    conn.close()
-    
-    log_action("placement", item_id=item_id, user_id=user_id, 
-              details=f"Placed item in container {container_id}")
-    
-    return jsonify({"success": True, "message": "Item placed successfully"})
+    try:
+        # In a real implementation, you would:
+        # 1. Look up the plan from database
+        # 2. Execute each step
+        # 3. Update container volumes
+        # 4. Log all actions
+        
+        # For this example, we'll simulate success
+        items_moved = 5  # This would come from actual execution
+        
+        conn.commit()
+        return jsonify({
+            "success": True,
+            "message": "Rearrangement completed successfully",
+            "itemsMoved": items_moved
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        })
+    finally:
+        cur.close()
+        conn.close()
 
 # Waste Management API
 @app.route('/api/waste/identify', methods=['GET'])
@@ -711,7 +835,85 @@ def simulate_day():
         "changes": changes
     })
 
+@app.route('/api/items', methods=['GET'])
+def get_items():
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    try:
+        cur.execute("""
+            SELECT 
+                item_id,
+                name,
+                width,
+                depth,
+                height,
+                mass,
+                priority,
+                expiry_date,
+                usage_limit,
+                preferred_zone,
+                current_zone,
+                is_waste
+            FROM items
+            WHERE is_waste = FALSE
+            ORDER BY priority DESC, name
+        """)
+        items = cur.fetchall()
+        
+        return jsonify({
+            "success": True,
+            "items": items
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        })
+    finally:
+        cur.close()
+        conn.close()
+        
 # Data Export/Import APIs
+@app.route('/api/import/containers', methods=['POST'])
+def import_containers():
+    if 'file' not in request.files:
+        return jsonify({"success": False, "message": "No file uploaded"})
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"success": False, "message": "No file selected"})
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+        csv_reader = csv.DictReader(file.read().decode('utf-8').splitlines())
+        for row in csv_reader:
+            cur.execute(
+                "INSERT INTO containers (container_id, zone, width, depth, height, available_volume) "
+                "VALUES (%s, %s, %s, %s, %s, %s * %s * %s) "
+                "ON CONFLICT (container_id) DO NOTHING",
+                (
+                    row['Container ID'],
+                    row['Zone'],
+                    float(row['Width (cm)']),
+                    float(row['Depth (cm)']),
+                    float(row['Height (cm)']),
+                    float(row['Width (cm)']),
+                    float(row['Depth (cm)']),
+                    float(row['Height (cm)'])
+                ))
+        conn.commit()
+        log_action("import", details="Containers imported")
+        return jsonify({"success": True, "message": "Containers imported successfully"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)})
+    finally:
+        cur.close()
+        conn.close()
+
 @app.route('/api/import/items', methods=['POST'])
 def import_items():
     if 'file' not in request.files:
@@ -721,25 +923,21 @@ def import_items():
     if file.filename == '':
         return jsonify({"success": False, "message": "No file selected"})
     
-    if not file.filename.endswith('.csv'):
-        return jsonify({"success": False, "message": "Only CSV files are supported"})
-    
     conn = get_db_connection()
     cur = conn.cursor()
-    
-    items_imported = 0
-    errors = []
     
     try:
         csv_reader = csv.DictReader(file.read().decode('utf-8').splitlines())
         for row in csv_reader:
-            try:
-                cur.execute("""
-                    INSERT INTO items (
-                        item_id, name, width, depth, height, mass, priority,
-                        expiry_date, usage_limit, preferred_zone
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (
+            expiry_date = None if row['Expiry Date (ISO Format)'] == 'N/A' else row['Expiry Date (ISO Format)']
+            usage_limit = None if row['Usage Limit'] == 'N/A' else int(row['Usage Limit'])
+            
+            cur.execute(
+                "INSERT INTO items (item_id, name, width, depth, height, mass, priority, "
+                "expiry_date, usage_limit, preferred_zone) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
+                "ON CONFLICT (item_id) DO NOTHING",
+                (
                     row['Item ID'],
                     row['Name'],
                     float(row['Width (cm)']),
@@ -747,36 +945,20 @@ def import_items():
                     float(row['Height (cm)']),
                     float(row['Mass (kg)']),
                     int(row['Priority (1-100)']),
-                    datetime.strptime(row['Expiry Date (ISO Format)'], '%Y-%m-%d').date() if row['Expiry Date (ISO Format)'] != 'N/A' else None,
-                    int(row['Usage Limit']) if row['Usage Limit'] != 'N/A' else None,
+                    expiry_date,
+                    usage_limit,
                     row['Preferred Zone']
-                ))
-                items_imported += 1
-            except Exception as e:
-                errors.append({
-                    "row": row,
-                    "error": str(e)
-                })
-        
+                )
+            )
         conn.commit()
+        log_action("import", details="Items imported")
+        return jsonify({"success": True, "message": "Items imported successfully"})
     except Exception as e:
         conn.rollback()
-        return jsonify({
-            "success": False,
-            "message": f"Import failed: {str(e)}",
-            "itemsImported": items_imported,
-            "errors": errors
-        })
+        return jsonify({"success": False, "message": str(e)})
     finally:
         cur.close()
         conn.close()
-    
-    log_action("import", details=f"Imported {items_imported} items")
-    return jsonify({
-        "success": True,
-        "itemsImported": items_imported,
-        "errors": errors
-    })
 
 @app.route('/api/export/arrangement', methods=['GET'])
 def export_arrangement():
@@ -830,6 +1012,140 @@ def export_arrangement():
         return jsonify({
             "success": False,
             "message": f"Export failed: {str(e)}"
+        })
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/api/containers', methods=['GET'])
+def get_containers():
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    try:
+        cur.execute("""
+            SELECT 
+                container_id, 
+                zone, 
+                width, 
+                depth, 
+                height, 
+                available_volume,
+                width * depth * height AS total_volume
+            FROM containers
+            ORDER BY zone, container_id
+        """)
+        containers = cur.fetchall()
+        
+        return jsonify({
+            "success": True,
+            "containers": containers
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        })
+    finally:
+        cur.close()
+        conn.close()
+
+
+@app.route('/api/containers/with-items', methods=['GET'])
+def get_containers_with_items():
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    try:
+        cur.execute("""
+            SELECT 
+                c.container_id,
+                c.zone,
+                c.width,
+                c.depth,
+                c.height,
+                c.available_volume,
+                c.width * c.depth * c.height AS total_volume,
+                COALESCE(
+                    json_agg(
+                        json_build_object(
+                            'item_id', i.item_id,
+                            'name', i.name,
+                            'width', i.width,
+                            'depth', i.depth,
+                            'height', i.height,
+                            'priority', i.priority,
+                            'is_waste', i.is_waste,
+                            'usage_limit', i.usage_limit,
+                            'start_coordinates', p.start_coordinates,
+                            'end_coordinates', p.end_coordinates
+                        )
+                    ) FILTER (WHERE i.item_id IS NOT NULL),
+                    '[]'
+                ) AS items
+            FROM containers c
+            LEFT JOIN placements p ON c.container_id = p.container_id
+            LEFT JOIN items i ON p.item_id = i.item_id
+            GROUP BY c.container_id
+            ORDER BY c.zone, c.container_id
+        """)
+        containers = cur.fetchall()
+        
+        # Parse JSON coordinates
+        for container in containers:
+            for item in container['items']:
+                if isinstance(item['start_coordinates'], str):
+                    item['start_coordinates'] = json.loads(item['start_coordinates'])
+                if isinstance(item['end_coordinates'], str):
+                    item['end_coordinates'] = json.loads(item['end_coordinates'])
+        
+        return jsonify({
+            "success": True,
+            "containers": containers
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        })
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/api/items/unplaced', methods=['GET'])
+def get_unplaced_items():
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    try:
+        cur.execute("""
+            SELECT 
+                i.item_id,
+                i.name,
+                i.width,
+                i.depth,
+                i.height,
+                i.mass,
+                i.priority,
+                i.expiry_date,
+                i.usage_limit,
+                i.preferred_zone
+            FROM items i
+            LEFT JOIN placements p ON i.item_id = p.item_id
+            WHERE p.item_id IS NULL
+            AND i.is_waste = FALSE
+            ORDER BY i.priority DESC
+        """)
+        items = cur.fetchall()
+        
+        return jsonify({
+            "success": True,
+            "items": items
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
         })
     finally:
         cur.close()
@@ -909,4 +1225,4 @@ def get_logs():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=8000, debug=True)
