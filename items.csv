@@ -1,0 +1,4 @@
+Item ID,Name,Width (cm),Depth (cm),Height (cm),Mass (kg),Priority (1-100),Expiry Date (ISO Format),Usage Limit,Preferred Zone
+ITEM001,Food Packet,10,10,20,5,80,2025-05-20,30,Crew Quarters
+ITEM002,Oxygen Cylinder,15,15,50,30,95,N/A,100,Airlock
+ITEM003,First Aid Kit,20,20,10,2,100,2025-07-10,5,Medical Bay
