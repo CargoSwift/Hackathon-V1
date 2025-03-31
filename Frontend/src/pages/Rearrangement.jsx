@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { api } from '../utils/api'
+import { useEffect, useState } from 'react'
+import './Rearrangement.css'
 
 export default function Rearrangement() {
   const [containers, setContainers] = useState([])

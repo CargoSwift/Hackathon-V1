@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { api } from '../utils/api'
+import './Retrieval.css'
 
 export default function Retrieval() {
   const [searchTerm, setSearchTerm] = useState('')

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { api } from '../utils/api'
+import './Dashboard.css'
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -15,10 +16,9 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // In a real app, you'd have specific endpoints for these stats
-        const logsRes = await api.getLogs({ limit: 5 })
-        setRecentLogs(logsRes.logs)
-        
+        const logsRes = await api.getLogs({ limit: 5 }) // Ensure this function is correct
+        setRecentLogs(logsRes.logs || []) // Ensure logsRes.logs exists
+
         // Mock stats - replace with actual API calls
         setStats({
           totalItems: 1243,
@@ -33,7 +33,7 @@ export default function Dashboard() {
         setLoading(false)
       }
     }
-    
+
     fetchData()
   }, [])
 
@@ -42,7 +42,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       <h1>Cargo Management Dashboard</h1>
-      
+
       <div className="stats-grid">
         <div className="stat-card">
           <h3>Total Items</h3>
@@ -65,7 +65,7 @@ export default function Dashboard() {
           <p>{stats.highPriorityItems}</p>
         </div>
       </div>
-      
+
       <div className="recent-activity">
         <h2>Recent Activity</h2>
         <table>
@@ -79,8 +79,8 @@ export default function Dashboard() {
             </tr>
           </thead>
           <tbody>
-            {recentLogs.map(log => (
-              <tr key={log.log_id}>
+            {recentLogs.map((log, index) => (
+              <tr key={log.log_id || index}> {/* Ensure unique key */}
                 <td>{new Date(log.logged_at).toLocaleString()}</td>
                 <td>{log.action_type}</td>
                 <td>{log.item_id || 'N/A'}</td>

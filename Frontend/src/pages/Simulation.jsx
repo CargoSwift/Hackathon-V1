@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { api } from '../utils/api'
+import './Simulation.css'
 
 export default function Simulation() {
   const [daysToSimulate, setDaysToSimulate] = useState(1)
