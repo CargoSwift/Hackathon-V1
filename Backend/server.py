@@ -6,12 +6,13 @@ from psycopg2.extras import RealDictCursor
 import json
 import os
 from dotenv import load_dotenv
+from flask_cors import CORS
 import uuid
 
 load_dotenv()
 
 app = Flask(__name__)
-
+CORS(app)
 # Database connection
 def get_db_connection():
     return psycopg2.connect(
@@ -135,7 +136,6 @@ def calculate_placement(containers, items):
                 "message": "Insufficient space - rearrangement required"
             })
     
-    print(placements)
     return placements, rearrangements
 
 def check_expired_items():
@@ -1225,4 +1225,4 @@ def get_logs():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=8000)

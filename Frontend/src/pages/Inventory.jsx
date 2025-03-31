@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import "./Inventory.css";
 
+const API_BASE = "http://localhost:8000";
+
 export default function Inventory() {
   const [containers, setContainers] = useState([]);
   const [unplacedItems, setUnplacedItems] = useState([]);
@@ -13,11 +15,13 @@ export default function Inventory() {
         setLoading(true);
 
         // Fetch containers with their items
-        const containersRes = await fetch("/api/containers/with-items");
+        const containersRes = await fetch(
+          API_BASE + "/api/containers/with-items"
+        );
         const containersData = await containersRes.json();
 
         // Fetch items not in any container
-        const unplacedRes = await fetch("/api/items/unplaced");
+        const unplacedRes = await fetch(API_BASE + "/api/items/unplaced");
         const unplacedData = await unplacedRes.json();
         console.log(containersData);
 

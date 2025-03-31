@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { api } from "../utils/api";
 import "./Simulation.css";
 
+const API_BASE = "http://localhost:8000";
 export default function Simulation() {
   const [daysToSimulate, setDaysToSimulate] = useState(1);
   const [itemsToUse, setItemsToUse] = useState([]);
@@ -16,7 +17,7 @@ export default function Simulation() {
     async function fetchItems() {
       try {
         setLoading(true);
-        const response = await fetch("/api/items");
+        const response = await fetch(API_BASE + "/api/items");
         const data = await response.json();
         if (data.success) {
           setItems(data.items);

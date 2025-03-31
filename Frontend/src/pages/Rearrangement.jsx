@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import "./Rearrangement.css";
 
+const API_BASE = "http://localhost:8000";
+
 export default function Rearrangement() {
   const [containers, setContainers] = useState([]);
   const [items, setItems] = useState([]);
@@ -15,8 +17,8 @@ export default function Rearrangement() {
       try {
         setLoading(true);
         const [containersRes, itemsRes] = await Promise.all([
-          fetch("/api/containers"),
-          fetch("/api/items?include_waste=false"),
+          fetch(API_BASE + "/api/containers"),
+          fetch(API_BASE + "/api/items?include_waste=false"),
         ]);
 
         const containersData = await containersRes.json();
@@ -38,7 +40,7 @@ export default function Rearrangement() {
 
     try {
       setLoading(true);
-      const response = await fetch("/api/rearrange", {
+      const response = await fetch(API_BASE + "/api/rearrange", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,7 +67,7 @@ export default function Rearrangement() {
 
     try {
       setLoading(true);
-      const response = await fetch("/api/rearrange/execute", {
+      const response = await fetch(API_BASE + "/api/rearrange/execute", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -79,7 +81,7 @@ export default function Rearrangement() {
       if (result.success) {
         setExecutionResults(result);
         // Refresh data
-        const containersRes = await fetch("/api/containers");
+        const containersRes = await fetch(API_BASE + "/api/containers");
         const containersData = await containersRes.json();
         if (containersData.success) setContainers(containersData.containers);
       }

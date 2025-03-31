@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 
+const API_BASE = "http://localhost:8000";
 export default function PlacementRecommendations() {
   const [containers, setContainers] = useState([]);
   const [items, setItems] = useState([]);
@@ -14,7 +15,7 @@ export default function PlacementRecommendations() {
         setLoading(true);
 
         // Fetch containers
-        const containersRes = await fetch("/api/containers");
+        const containersRes = await fetch(API_BASE + "/api/containers");
         if (!containersRes.ok) throw new Error("Failed to fetch containers");
         const containersData = await containersRes.json();
 
@@ -27,7 +28,7 @@ export default function PlacementRecommendations() {
         }
 
         // Fetch items
-        const itemsRes = await fetch("/api/items");
+        const itemsRes = await fetch(API_BASE + "/api/items");
         if (!itemsRes.ok) throw new Error("Failed to fetch items");
         const itemsData = await itemsRes.json();
 
@@ -50,9 +51,9 @@ export default function PlacementRecommendations() {
   const handleGeneratePlacements = async () => {
     try {
       console.log(containers);
-      
+
       setLoading(true);
-      const response = await fetch("/api/placement", {
+      const response = await fetch(API_BASE + "/api/placement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
