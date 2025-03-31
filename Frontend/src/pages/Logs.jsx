@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
-import { api } from '../utils/api'
+import { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import "./Logs.css"
 
 export default function Logs() {
-  const [logs, setLogs] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
@@ -13,36 +13,36 @@ export default function Logs() {
     actionType: '',
     limit: 50,
     offset: 0
-  })
-  const [totalLogs, setTotalLogs] = useState(0)
+  });
+  const [totalLogs, setTotalLogs] = useState(0);
 
   useEffect(() => {
-    fetchLogs()
-  }, [filters.limit, filters.offset])
+    fetchLogs();
+  }, [filters.limit, filters.offset]);
 
   const fetchLogs = async () => {
     try {
-      setLoading(true)
-      const result = await api.getLogs(filters)
+      setLoading(true);
+      const result = await api.getLogs(filters);
       if (result.success) {
-        setLogs(result.logs)
-        setTotalLogs(result.total)
+        setLogs(result.logs);
+        setTotalLogs(result.total);
       }
     } catch (error) {
-      console.error('Error fetching logs:', error)
+      console.error('Error fetching logs:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleFilterChange = (e) => {
-    const { name, value } = e.target
-    setFilters(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFilters(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleApplyFilters = () => {
-    fetchLogs()
-  }
+    setFilters(prev => ({ ...prev, offset: 0 }));
+  };
 
   const handleResetFilters = () => {
     setFilters({
@@ -53,12 +53,12 @@ export default function Logs() {
       actionType: '',
       limit: 50,
       offset: 0
-    })
-  }
+    });
+  };
 
   const handlePageChange = (newOffset) => {
-    setFilters(prev => ({ ...prev, offset: newOffset }))
-  }
+    setFilters(prev => ({ ...prev, offset: newOffset }));
+  };
 
   return (
     <div className="logs">
@@ -121,6 +121,7 @@ export default function Logs() {
             <option value="disposal">Disposal</option>
             <option value="import">Import</option>
             <option value="export">Export</option>
+            <option value="simulation">Simulation</option>
           </select>
         </div>
         
@@ -181,5 +182,5 @@ export default function Logs() {
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,27 +1,31 @@
 .dashboard {
-    background: url('../assets/dashboard_img.jpg') no-repeat center center;
-    background-size: cover;
-    color: white;
-    padding: 20px;
-    min-height: 100vh;
-    background-attachment: fixed;
-    position: relative;
+  background: url("../assets/dashboard_img.jpg") no-repeat center center;
+  background-size: cover;
+  color: white;
+  padding: 20px;
+  min-height: 100vh;
+  background-attachment: fixed;
+  position: relative;
 }
 
 .dashboard::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.2);
-    z-index: 0;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 0;
 }
 
 .dashboard > * {
-    position: relative;
-    z-index: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.tabs{
+  display: flex;
 }
 
 .stats-grid {
@@ -56,39 +60,40 @@
 }
 
 .recent-activity {
-    background: rgba(34, 34, 34, 0.8);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  background: rgba(34, 34, 34, 0.8);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .recent-activity h2 {
-    margin-top: 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #555;
+  margin-top: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #555;
 }
 
 .recent-activity table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
 }
 
-.recent-activity th, .recent-activity td {
-    border: 1px solid #555;
-    padding: 12px 8px;
-    text-align: left;
+.recent-activity th,
+.recent-activity td {
+  border: 1px solid #555;
+  padding: 12px 8px;
+  text-align: left;
 }
 
 .recent-activity th {
-    background-color: rgba(68, 68, 68, 0.8);
-    font-weight: bold;
+  background-color: rgba(68, 68, 68, 0.8);
+  font-weight: bold;
 }
 
 .recent-activity tr:nth-child(even) {
-    background-color: rgba(50, 50, 50, 0.5);
+  background-color: rgba(50, 50, 50, 0.5);
 }
 
 .recent-activity tr:hover {
-    background-color: rgba(70, 70, 70, 0.7);
+  background-color: rgba(70, 70, 70, 0.7);
 }

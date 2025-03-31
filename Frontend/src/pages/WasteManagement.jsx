@@ -1,87 +1,87 @@
-import { useEffect, useState } from 'react'
-import { api } from '../utils/api'
-import "./WasteManagement.css"
+import { useState, useEffect } from "react";
+import { api } from "../utils/api";
+import "./WasteManagement.css";
 
 export default function WasteManagement() {
-  const [wasteItems, setWasteItems] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [returnPlan, setReturnPlan] = useState(null)
+  const [wasteItems, setWasteItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [returnPlan, setReturnPlan] = useState(null);
   const [undockingData, setUndockingData] = useState({
-    containerId: '',
-    date: new Date().toISOString().split('T')[0],
-    maxWeight: 1000
-  })
+    containerId: "",
+    date: new Date().toISOString().split("T")[0],
+    maxWeight: 1000,
+  });
 
   useEffect(() => {
-    fetchWasteItems()
-  }, [])
+    fetchWasteItems();
+  }, []);
 
   const fetchWasteItems = async () => {
     try {
-      setLoading(true)
-      const result = await api.identifyWaste()
+      setLoading(true);
+      const result = await api.identifyWaste();
       if (result.success) {
-        setWasteItems(result.wasteItems)
+        setWasteItems(result.wasteItems);
       }
     } catch (error) {
-      console.error('Error fetching waste items:', error)
+      console.error("Error fetching waste items:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCreateReturnPlan = async () => {
-    if (!undockingData.containerId) return
-    
+    if (!undockingData.containerId) return;
+
     try {
-      setLoading(true)
+      setLoading(true);
       const result = await api.createReturnPlan({
         undockingContainerId: undockingData.containerId,
         undockingDate: undockingData.date,
-        maxWeight: undockingData.maxWeight
-      })
-      
+        maxWeight: undockingData.maxWeight,
+      });
+
       if (result.success) {
-        setReturnPlan(result.returnPlan)
+        setReturnPlan(result.returnPlan);
       }
     } catch (error) {
-      console.error('Error creating return plan:', error)
+      console.error("Error creating return plan:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCompleteUndocking = async () => {
-    if (!returnPlan?.planId) return
-    
+    if (!returnPlan?.planId) return;
+
     try {
-      setLoading(true)
+      setLoading(true);
       const result = await api.completeUndocking({
-        planId: returnPlan.planId
-      })
-      
+        planId: returnPlan.planId,
+      });
+
       if (result.success) {
-        alert(`Successfully undocked ${result.itemsRemoved} waste items`)
-        setReturnPlan(null)
-        fetchWasteItems()
+        alert(`Successfully undocked ${result.itemsRemoved} waste items`);
+        setReturnPlan(null);
+        fetchWasteItems();
       }
     } catch (error) {
-      console.error('Error completing undocking:', error)
+      console.error("Error completing undocking:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="waste-management">
       <h1>Waste Management</h1>
-      
+
       <div className="waste-list">
         <h2>Waste Items</h2>
         <button onClick={fetchWasteItems} disabled={loading}>
-          {loading ? 'Refreshing...' : 'Refresh Waste List'}
+          {loading ? "Refreshing..." : "Refresh Waste List"}
         </button>
-        
+
         {wasteItems.length > 0 ? (
           <table>
             <thead>
@@ -95,7 +95,7 @@ export default function WasteManagement() {
               </tr>
             </thead>
             <tbody>
-              {wasteItems.map(item => (
+              {wasteItems.map((item) => (
                 <tr key={item.item_id}>
                   <td>{item.item_id}</td>
                   <td>{item.name}</td>
@@ -111,64 +111,81 @@ export default function WasteManagement() {
           <p>No waste items identified.</p>
         )}
       </div>
-      
+
       <div className="return-planning">
         <h2>Return Planning</h2>
-        
+
         <div className="form-group">
           <label>Undocking Container ID:</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={undockingData.containerId}
-            onChange={(e) => setUndockingData({...undockingData, containerId: e.target.value})}
+            onChange={(e) =>
+              setUndockingData({
+                ...undockingData,
+                containerId: e.target.value,
+              })
+            }
             placeholder="Enter container ID"
           />
         </div>
-        
+
         <div className="form-group">
           <label>Undocking Date:</label>
-          <input 
-            type="date" 
+          <input
+            type="date"
             value={undockingData.date}
-            onChange={(e) => setUndockingData({...undockingData, date: e.target.value})}
+            onChange={(e) =>
+              setUndockingData({ ...undockingData, date: e.target.value })
+            }
           />
         </div>
-        
+
         <div className="form-group">
           <label>Max Weight (kg):</label>
-          <input 
-            type="number" 
+          <input
+            type="number"
             value={undockingData.maxWeight}
-            onChange={(e) => setUndockingData({...undockingData, maxWeight: e.target.value})}
+            onChange={(e) =>
+              setUndockingData({ ...undockingData, maxWeight: e.target.value })
+            }
             min="1"
           />
         </div>
-        
-        <button 
-          onClick={handleCreateReturnPlan} 
+
+        <button
+          onClick={handleCreateReturnPlan}
           disabled={!undockingData.containerId || loading}
         >
-          {loading ? 'Creating Plan...' : 'Create Return Plan'}
+          {loading ? "Creating Plan..." : "Create Return Plan"}
         </button>
       </div>
-      
+
       {returnPlan && (
         <div className="return-plan">
           <h3>Return Plan Details</h3>
-          <p><strong>Plan ID:</strong> {returnPlan.planId}</p>
-          <p><strong>Items to Return:</strong> {returnPlan.itemsToReturn}</p>
-          <p><strong>Total Volume:</strong> {returnPlan.totalVolume} cm³</p>
-          <p><strong>Total Weight:</strong> {returnPlan.totalWeight} kg</p>
-          
-          <button 
+          <p>
+            <strong>Plan ID:</strong> {returnPlan.planId}
+          </p>
+          <p>
+            <strong>Items to Return:</strong> {returnPlan.itemsToReturn}
+          </p>
+          <p>
+            <strong>Total Volume:</strong> {returnPlan.totalVolume} cm³
+          </p>
+          <p>
+            <strong>Total Weight:</strong> {returnPlan.totalWeight} kg
+          </p>
+
+          <button
             onClick={handleCompleteUndocking}
             disabled={loading}
             className="undock-button"
           >
-            {loading ? 'Undocking...' : 'Complete Undocking'}
+            {loading ? "Undocking..." : "Complete Undocking"}
           </button>
         </div>
       )}
     </div>
-  )
+  );
 }
