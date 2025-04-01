@@ -1,4 +1,151 @@
 Item ID,Name,Width (cm),Depth (cm),Height (cm),Mass (kg),Priority (1-100),Expiry Date (ISO Format),Usage Limit,Preferred Zone
-ITEM001,Food Packet,10,10,20,5,80,2025-05-20,30,Crew Quarters
-ITEM002,Oxygen Cylinder,15,15,50,30,95,N/A,100,Airlock
-ITEM003,First Aid Kit,20,20,10,2,100,2025-07-10,5,Medical Bay
+ITEM006,Battery Pack,15,10,5,3,85,01-03-2026,100.0,Workshop
+ITEM819,Biological Sample Kit,47,14,86,43,73,08-08-2029,,Storage
+ITEM010,Cleaning Supplies,25,15,40,8,40,,200.0,Sanitation
+ITEM750,Emergency Blanket,26,10,13,23,56,23-11-2026,,Airlock
+ITEM889,Fire Extinguisher,25,27,97,40,84,,,Storage
+ITEM003,First Aid Kit,20,20,10,2,100,10-07-2025,5.0,Medical Bay
+ITEM546,First Response Kit,27,35,26,22,89,05-12-2027,124.0,Science Lab
+ITEM001,Food Packet,10,10,20,5,80,20-05-2025,30.0,Crew Quarters
+ITEM923,Gas Analyzer,12,19,93,31,82,,,Workshop
+ITEM846,Geological Sampler,13,14,10,16,83,,17.0,Crew Quarters
+ITEM913,Handheld Scanner,30,21,76,19,57,,,Workshop
+ITEM007,Medical Supplies,20,15,25,4,95,30-11-2024,25.0,Medical Bay
+ITEM682,Multitool,21,17,95,26,79,20-05-2026,,Airlock
+ITEM002,Oxygen Cylinder,15,15,50,30,95,,100.0,Airlock
+ITEM679,Plasma Cutter,39,14,77,48,65,09-06-2030,,Science Lab
+ITEM415,Portable Generator,37,22,79,42,50,15-08-2029,,Medical Bay
+ITEM876,Portable Oxygen Supply,36,48,12,7,61,28-02-2026,88.0,Workshop
+ITEM686,Radiation Detector,19,20,54,45,90,28-05-2026,97.0,Airlock
+ITEM877,Radiation Shielding,18,19,44,26,83,05-07-2027,,Storage
+ITEM577,Satellite Phone,38,20,17,42,70,01-11-2027,131.0,Science Lab
+ITEM807,Space Heater,47,40,61,1,62,27-12-2025,168.0,Crew Quarters
+ITEM995,Spare Batteries,24,39,88,5,69,,,Storage
+ITEM008,Spare Parts Kit,30,20,10,12,60,,,Workshop
+ITEM522,Structural Repair Kit,43,22,38,12,73,,,Airlock
+ITEM290,Survival Rations,44,37,97,28,90,18-11-2025,43.0,Science Lab
+ITEM299,Thermal Suit,19,47,36,7,77,12-08-2026,,Workshop
+ITEM004,Tool Kit,25,15,10,8,75,,50.0,Workshop
+ITEM005,Water Container,30,30,40,25,90,15-12-2024,,Crew Quarters
+ITEM225,Water Purifier,38,38,60,46,53,20-07-2029,21.0,Science Lab
+ITEM1000,Solar Panel,20,16,176,10,12,,,Sanitation
+ITEM1001,Navigation Kit,6,84,82,24,82,27-07-2033,324.0,Sanitation
+ITEM1002,First Aid Box,83,92,179,14,9,27-06-2026,,Workshop
+ITEM1003,Thermal Regulator,57,75,118,34,55,01-09-2029,,Workshop
+ITEM1004,Power Adapter,68,85,11,2,46,31-08-2030,310.0,Workshop
+ITEM1005,Survival Rations,97,77,104,27,40,02-11-2026,337.0,Airlock
+ITEM1006,Radiation Shield,81,24,132,32,55,,419.0,Airlock
+ITEM1007,Oxygen Tank,10,41,79,13,54,,,Control Room
+ITEM1008,Hydration Pack,100,40,62,1,74,23-03-2035,242.0,Storage
+ITEM1009,Tool Kit,44,65,60,14,32,,66.0,Storage
+ITEM1010,Medical Scanner,18,36,132,13,88,29-03-2033,491.0,Workshop
+ITEM1011,Data Recorder,9,30,74,5,76,,403.0,Airlock
+ITEM1012,Portable Generator,99,31,198,42,18,,,Workshop
+ITEM1013,Communication Module,28,16,155,49,53,,204.0,Control Room
+ITEM1014,Air Purifier,47,32,15,6,55,25-12-2026,,Sanitation
+ITEM1015,Insulation Panel,48,27,48,48,95,17-08-2032,,Airlock
+ITEM1016,Mechanical Arm,72,24,34,26,98,03-10-2034,339.0,Airlock
+ITEM1017,Biometric Sensor,28,61,72,40,59,,461.0,Control Room
+ITEM1018,Fuel Canister,92,73,84,33,92,,99.0,Sanitation
+ITEM1019,Antimicrobial Spray,10,86,191,1,1,16-09-2028,,Storage
+ITEM1020,Shock Absorber,5,61,45,24,71,30-03-2030,318.0,Sanitation
+ITEM1021,Tensile Rope,71,47,175,7,36,,439.0,Workshop
+ITEM1022,Glass Cutter,86,8,125,47,88,,459.0,Control Room
+ITEM1023,Radiation Detector,7,8,122,36,57,26-08-2034,,Control Room
+ITEM1024,Magnetic Boots,63,91,49,19,12,03-10-2028,459.0,Control Room
+ITEM1025,Emergency Beacon,67,54,103,37,53,,470.0,Sanitation
+ITEM1026,Safety Harness,86,35,6,13,66,03-11-2029,288.0,Control Room
+ITEM1027,Cryogenic Flask,47,7,59,34,26,06-11-2030,,Control Room
+ITEM1028,Water Filtration Unit,5,94,117,4,7,07-12-2031,485.0,Storage
+ITEM1029,Thermal Imaging Camera,19,77,64,49,72,03-02-2035,433.0,Workshop
+ITEM1030,Insulated Gloves,92,85,94,33,10,05-12-2028,487.0,Storage
+ITEM1031,Acoustic Sensor,94,35,162,32,47,03-05-2030,,Workshop
+ITEM1032,Energy Storage Unit,45,65,91,45,8,13-09-2026,371.0,Airlock
+ITEM1033,Biosensor Module,66,65,29,18,95,,383.0,Storage
+ITEM1034,Aerogel Padding,5,42,114,46,68,16-05-2032,465.0,Sanitation
+ITEM1035,Carbon Filter,95,43,14,24,6,,,Storage
+ITEM1036,Evacuation Pod,49,88,161,2,80,04-05-2031,,Sanitation
+ITEM1037,Heat Shield,26,24,5,9,22,28-07-2032,,Control Room
+ITEM1038,Geiger Counter,44,67,130,8,42,,256.0,Airlock
+ITEM1039,Microbial Detector,28,75,62,50,28,28-09-2028,,Airlock
+ITEM1040,Alloy Reinforcement,48,99,83,23,58,,,Sanitation
+ITEM1041,Structural Foam,72,84,15,35,98,21-07-2028,,Control Room
+ITEM1042,Sealing Compound,77,62,23,25,19,,471.0,Airlock
+ITEM1043,Modular Frame,65,48,7,3,47,06-09-2029,,Sanitation
+ITEM1044,Pressure Regulator,89,91,187,40,90,12-03-2032,347.0,Storage
+ITEM1045,Hydraulic Pump,21,89,78,31,73,08-02-2029,285.0,Storage
+ITEM1046,Lubrication System,36,62,162,42,87,27-08-2033,488.0,Storage
+ITEM1047,Impact Absorber,34,64,63,45,48,26-03-2035,315.0,Control Room
+ITEM1048,Adaptive Cooling System,60,78,158,22,7,04-06-2026,,Airlock
+ITEM1049,Plasma Cutter,37,63,152,40,42,18-11-2031,,Storage
+ITEM1050,Laser Torch,23,8,95,43,70,10-03-2035,185.0,Control Room
+ITEM1051,Multi-tool,34,54,140,43,95,07-04-2033,385.0,Airlock
+ITEM1052,Portable Shelter,94,43,36,38,85,,73.0,Control Room
+ITEM1053,Anti-static Mat,61,84,35,18,36,19-02-2034,157.0,Airlock
+ITEM1054,Neural Interface,42,7,161,37,18,,,Storage
+ITEM1055,Chemical Analyzer,10,95,125,31,32,30-04-2034,,Airlock
+ITEM1056,Digital Multimeter,8,100,174,19,11,,,Sanitation
+ITEM1057,Phase Modulator,28,82,138,8,26,23-06-2033,76.0,Airlock
+ITEM1058,RFID Scanner,97,76,178,33,5,19-08-2029,83.0,Control Room
+ITEM1059,AI Assistant Module,17,41,22,7,47,17-07-2031,179.0,Workshop
+ITEM1060,Gravitational Stabilizer,26,28,99,25,32,21-11-2027,,Airlock
+ITEM1061,Force Sensor,21,34,184,49,3,29-01-2033,,Workshop
+ITEM1062,Soundproof Panel,78,91,140,16,30,01-11-2031,,Workshop
+ITEM1063,Heat Exchanger,89,96,118,33,34,,,Workshop
+ITEM1064,Vacuum Pump,56,100,25,7,97,01-03-2034,,Workshop
+ITEM1065,Biofuel Cell,92,88,14,25,27,,124.0,Control Room
+ITEM1066,Kinetic Energy Harvester,13,89,173,20,45,29-08-2028,,Airlock
+ITEM1067,Electromagnetic Shield,35,76,58,35,93,,161.0,Sanitation
+ITEM1068,Nano-coating Spray,58,36,73,25,6,10-12-2033,,Sanitation
+ITEM1069,Cryo Pack,85,72,49,8,83,,,Airlock
+ITEM1070,Graphene Battery,51,58,77,37,42,01-07-2028,376.0,Storage
+ITEM1071,Supercapacitor,50,53,17,33,60,04-12-2030,334.0,Sanitation
+ITEM1072,Vibration Dampener,58,68,34,43,82,,244.0,Control Room
+ITEM1073,Temperature Probe,74,40,136,36,24,,204.0,Storage
+ITEM1074,Fluid Dispenser,15,16,199,34,63,03-10-2030,379.0,Workshop
+ITEM1075,Self-healing Polymer,77,96,107,20,39,31-12-2029,162.0,Control Room
+ITEM1076,Adaptive Armor,14,68,168,1,62,,,Sanitation
+ITEM1077,Holographic Display,45,92,199,22,75,12-09-2033,,Control Room
+ITEM1078,Pressure Sensor,27,11,113,42,54,18-06-2027,,Sanitation
+ITEM1079,Sonic Screwdriver,35,43,74,33,92,,281.0,Airlock
+ITEM1080,Gyroscope Module,70,7,176,33,79,,97.0,Airlock
+ITEM1081,Emergency Ration Kit,73,65,153,7,6,28-09-2028,460.0,Workshop
+ITEM1082,Fireproof Suit,18,35,125,26,35,14-07-2026,348.0,Storage
+ITEM1083,LED Signal Flare,13,95,169,18,32,07-08-2029,,Workshop
+ITEM1084,Antenna Booster,73,47,22,15,30,02-08-2034,211.0,Storage
+ITEM1085,Air Compressor,43,46,31,15,22,10-01-2031,,Airlock
+ITEM1086,Waterproof Case,91,79,25,29,44,,,Workshop
+ITEM1087,Infrared Sensor,58,34,140,38,30,,128.0,Workshop
+ITEM1088,Plasma Shield,32,50,108,11,94,09-10-2029,,Airlock
+ITEM1089,Thermoelectric Generator,82,16,141,24,66,16-09-2029,78.0,Sanitation
+ITEM1090,Solar Stove,67,41,180,34,1,23-03-2030,,Airlock
+ITEM1091,Space Blanket,6,34,149,25,99,08-05-2030,126.0,Sanitation
+ITEM1092,Ballistic Shield,31,13,24,43,49,,,Sanitation
+ITEM1093,Robotic Assistant,39,34,35,31,72,13-09-2026,,Control Room
+ITEM1094,Mechanical Exosuit,46,60,89,28,68,24-01-2029,,Workshop
+ITEM1095,Vacuum Sealer,20,25,31,25,27,14-02-2033,,Workshop
+ITEM1096,Electrolyte Supplement,34,52,48,41,9,17-10-2026,351.0,Storage
+ITEM1097,Radiation-Proof Helmet,39,33,71,50,1,31-12-2028,,Sanitation
+ITEM1098,Electrostatic Cleaner,20,54,195,6,95,06-12-2028,,Workshop
+ITEM1099,Anti-microbial Coating,18,6,85,30,63,16-01-2028,126.0,Workshop
+ITEM1100,Power Inverter,45,18,105,27,25,05-06-2027,96.0,Airlock
+ITEM1101,Automated Repair Drone,19,67,39,17,19,14-09-2029,350.0,Sanitation
+ITEM1102,3D Bioprinter,82,74,162,42,2,01-01-2029,394.0,Storage
+ITEM1103,Aerodynamic Stabilizer,31,37,23,10,43,26-02-2031,,Control Room
+ITEM1104,Space Suit Upgrade Kit,86,29,83,42,91,,329.0,Workshop
+ITEM1105,Thermal Expansion Regulator,83,5,36,43,72,25-03-2029,97.0,Airlock
+ITEM1106,Cooling Gel Pack,10,18,100,41,19,19-12-2026,,Airlock
+ITEM1107,Advanced Circuit Board,46,9,134,4,98,12-11-2027,215.0,Workshop
+ITEM1108,Drone Deployment Kit,43,45,66,23,68,11-04-2032,77.0,Workshop
+ITEM1109,Emergency Escape Module,93,93,35,29,76,05-02-2030,,Control Room
+ITEM1110,Biohazard Containment Unit,54,24,89,23,64,19-05-2027,,Airlock
+ITEM1111,Quantum Encryption Module,36,14,79,42,35,23-03-2033,,Storage
+ITEM1112,Plasma Refinement Tool,63,8,17,33,36,,,Control Room
+ITEM1113,Neutron Absorber,62,43,185,23,28,04-02-2034,353.0,Workshop
+ITEM1114,Nano-Fabrication Unit,41,28,95,2,26,,488.0,Control Room
+ITEM1115,Energy Harvesting Tile,97,8,136,2,90,23-06-2033,,Control Room
+ITEM1116,Fusion Reactor Core,11,89,194,27,29,06-07-2029,,Sanitation
+ITEM1117,Microgravity Research Kit,26,24,132,7,20,04-05-2031,182.0,Control Room
+ITEM1118,Adaptive Thruster System,47,70,56,16,95,,493.0,Storage
+ITEM1119,AI-powered Diagnostics Tool,32,44,88,16,81,19-04-2034,,Sanitation
+ITEM1120,Haptic Feedback System,94,99,60,37,79,,331.0,Workshop
