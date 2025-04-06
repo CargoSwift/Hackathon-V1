@@ -7,7 +7,7 @@ export default function WasteManagement() {
   const [loading, setLoading] = useState(false);
   const [returnPlan, setReturnPlan] = useState(null);
   const [undockingData, setUndockingData] = useState({
-    containerId: "",
+    containerId: "contD",
     date: new Date().toISOString().split("T")[0],
     maxWeight: 1000,
   });
@@ -92,6 +92,7 @@ export default function WasteManagement() {
                 <th>Mass (kg)</th>
                 <th>Volume (cm³)</th>
                 <th>Marked Date</th>
+                <th>Items</th>
               </tr>
             </thead>
             <tbody>
@@ -103,6 +104,7 @@ export default function WasteManagement() {
                   <td>{item.mass}</td>
                   <td>{item.width * item.depth * item.height}</td>
                   <td>{new Date(item.marked_at).toLocaleDateString()}</td>
+                  <td>{item.usage_limit}</td>
                 </tr>
               ))}
             </tbody>
