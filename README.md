@@ -133,5 +133,5 @@ Function: Lists all expired or depleted items.
 ## run docker
 docker-compose up --build
 
-## clear docker cache files
+## clear docker cache files and postgresql data
 docker-compose down -v 
