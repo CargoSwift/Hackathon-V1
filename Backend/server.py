@@ -61,79 +61,133 @@ def log_action(action_type, item_id=None, user_id=None, details=None):
     conn.commit()
     cur.close()
     conn.close()
+def _get_next_position(container, item):
+    """
+    Simplified 3D bin-packing: we try to place item at (0,0,0) if no previous,
+    or at the end of last placed item's end coordinate in a row-wise manner.
+    """
+    width, depth, height = float(item['width']), float(item['depth']), float(item['height'])
+    container_w, container_d, container_h = float(container['width']), float(container['depth']), float(container['height'])
+    occupied = container['occupied_positions']
+
+    if not occupied:
+        return (
+            {"width": 0, "depth": 0, "height": 0},
+            {"width": width, "depth": depth, "height": height}
+        )
+
+    # Simple greedy placement heuristic — stack next to last if space allows
+    last_end = occupied[-1][1]
+    new_start = {
+        "width": float(last_end["width"]),
+        "depth": 0,
+        "height": 0
+    }
+    new_end = {
+        "width": new_start["width"] + width,
+        "depth": depth,
+        "height": height
+    }
+
+    if (new_end["width"] <= container_w and
+        new_end["depth"] <= container_d and
+        new_end["height"] <= container_h):
+        return (new_start, new_end)
+
+    return None  # Can't place (naive fallback)
 
 def calculate_placement(containers, items):
-    """Simplified placement algorithm - sorts items by priority and places in available space"""
+    from collections import defaultdict
+    import heapq
+
+    # Preprocess containers into zone-based buckets
+    zone_containers = defaultdict(list)
+    container_space_map = {}
+    
+    # print(items)
+    # print(containers)
+
+    for container in containers:
+        container_id = container['containerId']
+        zone = container['zone']
+        capacity = float(container['width']) * float(container['depth']) * float(container['height'])
+        container['remaining_volume'] = capacity
+        container['occupied_positions'] = []  # 3D tracking (simplified for API)
+        zone_containers[zone].append(container)
+        container_space_map[container_id] = container
+
+    # Sort items by priority descending and volume descending
+    def item_volume(item):
+        return float(item['width']) * float(item['depth']) * float(item['height'])
+    
+    items.sort(key=lambda x: (-x['priority'], -item_volume(x)))
+
     placements = []
     rearrangements = []
-    
-    # Sort items by priority (highest first)
-    sorted_items = sorted(items, key=lambda x: x['priority'], reverse=True)
-    
-    for item in sorted_items:
+
+    for item in items:
+        item_volume_val = item_volume(item)
         placed = False
-        
+
         # Try preferred zone first
-        for container in containers:
-            if container['zone'] == item['preferredZone']:
-                # Check if item fits (simplified check)
-                if (float(container['available_volume']) >= 
-                    float(item['width']) * float(item['depth']) * float(item['height'])):
+        preferred_zone = item['preferredZone']
+        zones_to_check = [preferred_zone] + [z for z in zone_containers if z != preferred_zone]
+
+        for zone in zones_to_check:
+            for container in zone_containers[zone]:
+                if container['remaining_volume'] >= item_volume_val:
+                    # Place item (naive position placement from origin)
+                    pos = _get_next_position(container, item)
+                    if pos is not None:
+                        start, end = pos
+                        container['remaining_volume'] -= item_volume_val
+                        container['occupied_positions'].append((start, end))
+
+                        placements.append({
+                            # "success": True,
+                            # "found": True,
+                            # "item": {
+                            #     "itemId": item['itemId'],
+                            #     "name": item['name'],
+                            #     "containerId": container['containerId'],
+                            #     "zone": container['zone'],
+                            #     "position": {
+                            #         "startCoordinates": start,
+                            #         "endCoordinates": end
+                            #     }
+                            # },
+                          
+                            "itemId": item['itemId'],
+                            "name": item['name'],
+                            "containerId": container['containerId'],
+                            "zone": container['zone'],
+                            "position": {
+                                "startCoordinates": start,
+                                "endCoordinates": end
+                            },
                     
-                    placement = {
-                        "itemId": item['itemId'],
-                        "containerId": container['containerId'],
-                        "position": {
-                            "startCoordinates": {
-                                "width": 0, 
-                                "depth": 0, 
-                                "height": 0
-                            },
-                            "endCoordinates": {
-                                "width": item['width'],
-                                "depth": item['depth'],
-                                "height": item['height']
-                            }
-                        }
-                    }
-                    placements.append(placement)
-                    av = float(container['available_volume'])
-                    av -= float(item['width']) * float(item['depth']) * float(item['height'])
-                    container['available_volume'] = av 
-                    placed = True
-                    break
-        
-        # If not placed in preferred zone, try any available container
+                            "retrievalSteps": [
+                                {
+                                    "step": 1,
+                                    "action": "retrieve",
+                                    "itemId": item['itemId'],
+                                    "itemName": item['name']
+                                }
+                            ]
+                        })
+                        placed = True
+                        break
+            if placed:
+                break
+
         if not placed:
-            for container in containers:
-                if float(container['available_volume']) >= float(item['width']) * float(item['depth']) * float(item['height']):
-                    placement = {
-                        "itemId": item['itemId'],
-                        "containerId": container['containerId'],
-                        "position": {
-                            "startCoordinates": {
-                                "width": 0, 
-                                "depth": 0, 
-                                "height": 0
-                            },
-                            "endCoordinates": {
-                                "width": item['width'],
-                                "depth": item['depth'],
-                                "height": item['height']
-                            }
-                        }
-                    }
-                    placements.append(placement)
-                    av = float(container['available_volume'])
-                    av -= float(item['width']) * float(item['depth']) * float(item['height'])
-                    container['available_volume'] = av 
-                    placed = True
-                    break
-        
-        if not placed:
-            rearrangements.append({
+            rearrangements.append(item['itemId'])
+            placements.append({
+                # "success": False,
+                # "found": False,
                 "itemId": item['itemId'],
-                "message": "Insufficient space - rearrangement required"
+                "name": item['name'],
+                "retrievalSteps": []
             })
     
     return placements, rearrangements

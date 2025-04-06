@@ -63,9 +63,13 @@ export default function PlacementRecommendations() {
             containerId: c.container_id,
             zone: c.zone,
             available_volume: c.available_volume,
+            width: c.width,
+            depth: c.depth,
+            height: c.height,
           })),
           items: items.map((i) => ({
             itemId: i.item_id,
+            name: i.name,
             width: i.width,
             depth: i.depth,
             height: i.height,
