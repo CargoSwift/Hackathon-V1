@@ -16,11 +16,11 @@ CORS(app)
 # Database connection
 def get_db_connection():
     return psycopg2.connect(
-        host=os.getenv('DB_HOST'),
-        database=os.getenv('DB_NAME'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),
-        port=os.getenv('DB_PORT')
+        host="localhost",
+        database="cargo_db",
+        user="cargo_admin",
+        password="admin",
+        port=5432
     )
 def calculate_retrieval_steps(item_id, container_id):
     # This is a simplified version - in a real implementation, you'd need to:
@@ -219,7 +219,7 @@ def check_expired_items():
 
 @app.route('/')
 def home():
-    return jsonify({'message': 'Space Station Cargo Management System API'})
+    return jsonify({'message': 'Space Station Cargo Management System API, frontend at http://localhost:5173'})
 
 
 
