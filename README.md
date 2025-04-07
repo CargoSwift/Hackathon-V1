@@ -98,4 +98,6 @@ npm start  # Run React.js frontend
 ### **Setup Docker Deployment**
 
 docker build -t space-cargo .
+
+
 docker run -d -p 5173:5173 -p 8000:8000 -p 5432:5432 -v pg_data:/var/lib/postgresql/data --name fullstack-container space-cargo
